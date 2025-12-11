@@ -2,6 +2,7 @@ mod fasta_parser;
 
 use anyhow::{Context, Result};
 use clap::Parser;
+use indicatif;
 
 #[derive(Parser)]
 struct Cli {
@@ -24,6 +25,12 @@ fn main() -> Result<()> {
         .with_context(|| format!("could not read file `{:?}`",args.property_fn))?;
     let _property = args.property;
 
+    let pb = indicatif::ProgressBar::new(100);
+    for i in 0..100 {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        pb.println(format!("[+] finished #{i}"));
+        pb.inc(1);
+    }
     let fa = fasta_parser::parse_alignment(alignment_content);
     println!("{:?}", fa);
     Ok(())
