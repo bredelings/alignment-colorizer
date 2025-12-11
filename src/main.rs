@@ -1,19 +1,18 @@
 mod fasta_parser;
-
 use anyhow::{Context, Result};
 use clap::Parser;
-use indicatif;
-use log::{info, warn};
+use log::info;
 
 #[derive(Parser)]
 struct Cli {
-    /// The alignment filename
-    alignment_fn: std::path::PathBuf,
+    /// The property name
+    property: String,
     /// The properties filename
     property_fn: std::path::PathBuf,
-    /// The property name
-    property: String
+    /// The alignment filename
+    alignment_fn: std::path::PathBuf
 }
+
 
 fn main() -> Result<()> {
 
@@ -30,15 +29,14 @@ fn main() -> Result<()> {
     info!("Read properties file");
     let _property = args.property;
 
-    let pb = indicatif::ProgressBar::new(10);
-    for i in 0..10 {
-        std::thread::sleep(std::time::Duration::from_millis(100));
-        pb.println(format!("[+] finished #{i}"));
-        pb.inc(1);
+    let recs = fasta_parser::parse_alignment(alignment_content);
+    info!("Got {:?} records", recs.len());
+
+    for rec in &recs {
+        println!("{}: {}", rec.name, rec.sequence.len());
     }
-    let fa = fasta_parser::parse_alignment(alignment_content);
-    warn!("nothing implemented!");
-    println!("{:?}", fa);
+    println!("Read {} records",recs.len());
+    
     Ok(())
 }
 
