@@ -3,6 +3,7 @@ use anyhow::{anyhow, Context, Result};
 use clap::Parser;
 use log::info;
 use serde_json;
+use std::collections::HashMap;
 
 #[derive(Parser)]
 struct Cli {
@@ -13,6 +14,9 @@ struct Cli {
     /// The alignment filename
     alignment_fn: std::path::PathBuf
 }
+
+type PropertyValues = HashMap<String, Vec<f64>>;
+type Properties = HashMap<String, PropertyValues>;
 
 fn get_alignment(filename: &std::path::Path) -> Result<Vec<fasta_parser::FastaRecord>, anyhow::Error>
 {
@@ -27,17 +31,17 @@ fn get_alignment(filename: &std::path::Path) -> Result<Vec<fasta_parser::FastaRe
 
 
 
-fn get_property_values(filename: &std::path::Path, property: &str) -> Result<serde_json::Value>
+fn get_property_values(filename: &std::path::Path, property: &str) -> Result<PropertyValues>
 {
     let properties_content = std::fs::read_to_string(filename)
         .with_context(|| format!("could not read file `{:?}`",filename))?;
     info!("Read properties file");
-    let properties_json: serde_json::Value = serde_json::from_str(&properties_content)
+    let properties: Properties = serde_json::from_str(&properties_content)
         .with_context(|| format!("failed to parse JSON from file `{}`", filename.display()))?;
 
-    properties_json.get(property)
+    properties.get(property)
         .ok_or_else(|| anyhow!("Properties JSON has no property '{}'",property))
-        .map(|json| json.clone())
+        .map(|inner_map| inner_map.clone())
 }
 
 fn main() -> Result<()>

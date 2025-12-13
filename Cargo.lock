@@ -23,6 +23,7 @@ dependencies = [
  "json",
  "log",
  "predicates",
+ "serde",
  "serde_json",
 ]
 
