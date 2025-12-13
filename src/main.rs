@@ -1,5 +1,6 @@
 mod fasta_parser;
 use anyhow::{anyhow, Context, Result};
+use std::path::{Path,PathBuf};
 use clap::Parser;
 use log::info;
 use serde_json;
@@ -10,15 +11,15 @@ struct Cli {
     /// The property name
     property: String,
     /// The properties filename
-    property_fn: std::path::PathBuf,
+    property_fn: PathBuf,
     /// The alignment filename
-    alignment_fn: std::path::PathBuf
+    alignment_fn: PathBuf
 }
 
 type PropertyValues = HashMap<String, Vec<f64>>;
 type Properties = HashMap<String, PropertyValues>;
 
-fn get_alignment(filename: &std::path::Path) -> Result<Vec<fasta_parser::FastaRecord>, anyhow::Error>
+fn get_alignment(filename: &Path) -> Result<Vec<fasta_parser::FastaRecord>, anyhow::Error>
 {
     let alignment_content = std::fs::read_to_string(filename)
         .with_context(|| format!("could not read file `{:?}`",filename))?;
@@ -29,9 +30,7 @@ fn get_alignment(filename: &std::path::Path) -> Result<Vec<fasta_parser::FastaRe
     Ok(sequences)
 }
 
-
-
-fn get_property_values(filename: &std::path::Path, property: &str) -> Result<PropertyValues>
+fn get_property_values(filename: &Path, property: &str) -> Result<PropertyValues>
 {
     let properties_content = std::fs::read_to_string(filename)
         .with_context(|| format!("could not read file `{:?}`",filename))?;
@@ -52,10 +51,14 @@ fn main() -> Result<()>
 
     let sequences = get_alignment(&args.alignment_fn)?;
 
-    let _property_values = get_property_values(&args.property_fn, &args.property)?;
+    let property_values = get_property_values(&args.property_fn, &args.property)?;
 
     for sequence in &sequences
     {
+        if property_values.get(&sequence.name).is_none()
+        {
+            panic!("No properties for sequence '{}'", sequence.name);
+        }
         println!("{}: {}", sequence.name, sequence.sequence);
     }
     println!("Read {} records",sequences.len());

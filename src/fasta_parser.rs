@@ -1,4 +1,5 @@
 use indicatif;
+// use log::info;
 
 pub struct FastaRecord {
     pub name: String,
@@ -22,6 +23,15 @@ pub fn parse_alignment(content: String) -> Vec<FastaRecord> {
             {
                 records.push(rec);
             }
+
+            let name = name.trim();
+
+            // Treat space as comment separator in FASTA names.
+            let name = match name.split_once(char::is_whitespace)
+            {
+                Some((prefix, _suffix)) => prefix,
+                None => name
+            };
 
             cur_rec = Some(FastaRecord{name: name.to_string(), sequence: String::new()});
         }
