@@ -59,7 +59,7 @@ fn main() -> Result<()>
         {
             panic!("No properties for sequence '{}'", sequence.name);
         }
-        println!("{}: {}", sequence.name, sequence.sequence);
+        println!("{}: '{}'", sequence.name, sequence.sequence);
     }
     println!("Read {} records",sequences.len());
     
