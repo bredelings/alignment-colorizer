@@ -10,14 +10,31 @@ pub fn parse_alignment(content: String) -> Vec<FastaRecord> {
     let n_lines = lines.count();
     let pb = indicatif::ProgressBar::new(n_lines.try_into().unwrap());
 
-    for (index,_line) in content.lines().enumerate() {
-        std::thread::sleep(std::time::Duration::from_millis(10));
-        pb.println(format!("[+] finished #{index}"));
+
+    let mut records: Vec<FastaRecord> = Vec::new();
+    let mut cur_rec: Option<FastaRecord> = None;
+
+    for line in content.lines()
+    {
+        if let Some(name) = line.strip_prefix('>')
+        {
+            if let Some(rec) = cur_rec.take()
+            {
+                records.push(rec);
+            }
+
+            cur_rec = Some(FastaRecord{name: name.to_string(), sequence: String::new()});
+        }
+        else
+        {
+            if let Some(rec) = cur_rec.as_mut()
+            {
+                rec.sequence.push_str(line);
+            }
+        }
         pb.inc(1);
     }
 
-    let rec1 = FastaRecord {name: "Homo".to_string(), sequence: "ATGC".to_string()};
-
-    Vec::from([rec1])
+    records
 }
 
