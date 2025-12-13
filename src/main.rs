@@ -34,6 +34,7 @@ fn main() -> Result<()> {
 
     for rec in &recs {
         println!("{}: {}", rec.name, rec.sequence.len());
+        println!("{}: {}", rec.name, rec.sequence);
     }
     println!("Read {} records",recs.len());
     

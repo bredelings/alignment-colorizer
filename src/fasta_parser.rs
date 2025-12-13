@@ -29,7 +29,10 @@ pub fn parse_alignment(content: String) -> Vec<FastaRecord> {
         {
             if let Some(rec) = cur_rec.as_mut()
             {
-                rec.sequence.push_str(line);
+                let chars: String = line.chars()
+                    .filter(|c| !c.is_whitespace())
+                    .collect();
+                rec.sequence.push_str(&chars);
             }
         }
         pb.inc(1);
